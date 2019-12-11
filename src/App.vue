@@ -1,14 +1,13 @@
 <template>
   <div id="app">
-    <h1>App Component</h1>
     <Header />
     <question-box />
   </div>
 </template>
 
 <script>
- import QuestionBox from './components/QuestionBox.vue'
- import Header from './components/Header.vue'
+import Header from './components/Header.vue'
+import QuestionBox from './components/QuestionBox.vue'
 
 export default {
   name: 'app',
