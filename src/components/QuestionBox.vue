@@ -42,21 +42,29 @@ export default {
     }
   },
   watch: {
-    currentQuestionWatch () {
+    /* currentQuestion () {
       this.selectedIndex = null
-      this.shuffleAnswer()
+      this.shuffleAnswers()
+    } */
+    currentQuestion: {
+      inmediate: true,
+      handler () {
+        this.selectedIndex = null
+        this.shuffleAnswers() 
+      }
     }
   },
   methods: {
     selectAnswer(index) {
       this.selectedIndex = index
     },
-    shuffleAnswer() {
+    shuffleAnswers() {
       let answers = [...this.currentQuestion.incorrect_answers, this.currentQuestion.correct_answers];
-      this.shuffleAnswers = _.shuffle(answers)
+      this.shuffleAnswer = _.shuffle(answers)
     }
   },
   mounted() {
+    this.shuffleAnswers();
     console.log(
       "%c%s",
       "color: blue; font-size: 14px",
