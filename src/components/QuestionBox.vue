@@ -7,32 +7,39 @@
 
       <b-list-group>
         <b-list-group-item
-          v-for="(answer, index) in currentAnswers"
+          v-for="(answer, index) in shuffleAnswer"
           :key="index"
           @click="selectAnswer(index)"
-          :class="[selectedIndex === index ? 'selected' : '']"
-        >
-          {{ answer }}
-        </b-list-group-item>
+          :class="answerClass(index)"
+        >{{ answer }}</b-list-group-item>
       </b-list-group>
 
-      <b-button variant="primary" href="#">Submit</b-button>
-      <b-button @click="nextQuestion" variant="success" href="#">Next</b-button>
+      <b-button
+        @click="submitAnswer"
+        variant="primary"
+        :disabled="selectedIndex === null || answered"
+      >Submit</b-button>
+      <b-button @click="nextQuestion" variant="success">Next</b-button>
     </b-jumbotron>
   </div>
 </template>
 
 <script>
-import _ from 'lodash';
+import _ from "lodash";
 export default {
   props: {
     currentQuestion: Object,
-    nextQuestion: Function
+    nextQuestion: Function,
+    increment: Function
   },
-  data: () => ({
-    selectedIndex: null, // No se pone cero para que no se marque por defecto la primera respuesta
-    shuffleAnswers: []
-  }),
+  data: function() {
+    return {
+      selectedIndex: null, // No se pone cero para que no se marque por defecto la primera respuesta
+      correctIndex: null,
+      shuffleAnswer: [],
+      answered: false
+    };
+  },
   computed: {
     currentAnswers() {
       let answers = [...this.currentQuestion.incorrect_answers];
@@ -42,25 +49,47 @@ export default {
     }
   },
   watch: {
-    /* currentQuestion () {
-      this.selectedIndex = null
-      this.shuffleAnswers()
-    } */
     currentQuestion: {
       inmediate: true,
-      handler () {
-        this.selectedIndex = null
-        this.shuffleAnswers() 
+      handler() {
+        this.selectedIndex = null;
+        this.answered = false;
+        this.shuffleAnswers();
       }
     }
   },
   methods: {
     selectAnswer(index) {
-      this.selectedIndex = index
+      this.selectedIndex = index;
+    },
+    submitAnswer() {
+      let isCorrect = false;
+
+      if (this.selectedIndex === this.correctIndex) {
+        isCorrect = true;
+      }
+      this.answered = true;
+      this.increment(isCorrect);
     },
     shuffleAnswers() {
-      let answers = [...this.currentQuestion.incorrect_answers, this.currentQuestion.correct_answers];
-      this.shuffleAnswer = _.shuffle(answers)
+      let answers = [
+        ...this.currentQuestion.incorrect_answers,
+        this.currentQuestion.correct_answer
+      ];
+
+      this.shuffleAnswer = _.shuffle(answers);
+      this.correctIndex = this.shuffleAnswer.indexOf(
+        this.currentQuestion.correct_answer
+      );
+    },
+    answerClass(index) {
+      let answerClass = ''
+
+      if (!this.answered && this.selectedIndex === index) { answerClass = 'selected' }
+      else if (this.answered && this.correctIndex === index) { answerClass = 'correct' }
+      else if (this.answered && this.selectedIndex === index && this.correctIndex !== index) { answerClass = 'incorrect' }
+      
+      return answerClass
     }
   },
   mounted() {
@@ -90,14 +119,14 @@ export default {
 }
 
 .selected {
-  background-color: lightblue;  
+  background-color: lightblue;
 }
 
 .correct {
-  background-color: green;  
+  background-color: green;
 }
 
 .incorrect {
-  background-color: red;  
+  background-color: red;
 }
 </style>
